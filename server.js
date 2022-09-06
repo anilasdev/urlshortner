@@ -15,6 +15,21 @@ app.use(
   })
 );
 
+app.use(
+  bodyParser.urlencoded({
+    limit: "1mb",
+    extended: true,
+    type: "application/x-www-form-urlencoded",
+  })
+);
+
+app.use(
+  bodyParser.json({
+    limit: "1mb",
+    type: "application/*",
+  })
+);
+
 fs.readdirSync("./app/routes").forEach((file) => {
   router.use(
     `/${path.parse(file).name}`,
