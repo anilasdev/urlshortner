@@ -32,7 +32,7 @@ app.use(
 
 fs.readdirSync("./app/routes").forEach((file) => {
   router.use(
-    `/${path.parse(file).name}`,
+    `/`,
     require(`./app/routes/${file}`)(express.Router())
   );
 });

@@ -1,4 +1,4 @@
-let { getUrls, createShortUrl } = require("../controllers/Url");
+let { getUrls, createShortUrl, getUrlById } = require("../controllers/Url");
 
 module.exports = (router) => {
   router.get("/", async (req, res) => {
@@ -24,8 +24,23 @@ module.exports = (router) => {
       ...response,
     });
   });
+  router.get("/:url_id", async (req, res) => {
+    try {
+      var url = await getUrlById(req.params.url_id, res);
+    } catch (error) {
+      if (error.statusCode === 500) {
+        console.error(error);
+      }
+      let errResponse = formatResponse({ error }, true);
+      let status = errResponse.status || 500;
+      delete errResponse.status;
+      return res.status(status).json({
+        ...errResponse,
+      });
+    }
+    return res.redirect(url.original_url);
+  });
   router.post("/", async (req, res) => {
-    console.log(req.body)
     try {
       var url = await createShortUrl(req.body);
     } catch (error) {

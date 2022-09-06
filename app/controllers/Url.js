@@ -8,11 +8,10 @@ module.exports = {
   createShortUrl: async function (body) {
     let { url } = body;
     const urlId = shortid.generate();
-    console.log(urlUtils.validateUrl(url));
     if (urlUtils.validateUrl(url)) {
       let wasUrlFound = await Url.query().findOne({ original_url: url });
       if (wasUrlFound) {
-       return wasUrlFound;
+        return wasUrlFound;
       } else {
         const shortUrl = `${process.env.BASE_URL}/${urlId}`;
 
@@ -27,6 +26,18 @@ module.exports = {
       throw {
         message: "invalid Original Url",
         statusCode: 400,
+      };
+    }
+  },
+  getUrlById: async function (urlId, res) {
+    const url = await Url.query().findOne({ url_id: urlId });
+    if (url) {
+      await Url.query().patchAndFetchById(url.id, { clicks: url.clicks + 1 });
+      return url;
+    } else {
+      throw {
+        statusCode: 400,
+        message: "Url not found",
       };
     }
   },
