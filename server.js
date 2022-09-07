@@ -29,12 +29,12 @@ app.use(
     type: "application/*",
   })
 );
+app.get("/status", (req, res) => {
+  res.send("Ok");
+});
 
 fs.readdirSync("./app/routes").forEach((file) => {
-  router.use(
-    `/`,
-    require(`./app/routes/${file}`)(express.Router())
-  );
+  router.use(`/`, require(`./app/routes/${file}`)(express.Router()));
 });
 
 app.use(router);
