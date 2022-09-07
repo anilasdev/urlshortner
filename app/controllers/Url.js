@@ -1,17 +1,34 @@
-const shortid = require("shortid");
+const { v4: uuidv4 } = require("uuid");
 const Url = require("../models/Url");
 const urlUtils = require("../lib/url");
 module.exports = {
   getUrls: async function (query, pageNumber = 0, perPage = 20) {
-    return {};
+    let urls = await Url.query()
+      .where({ is_deleted: false })
+      .orderBy("id", "desc");
+    return { results: urls };
+  },
+  getUniqueIds: function () {
+    console.log(uuidv4().split("-"));
+    return uuidv4().split("-")[0];
   },
   createShortUrl: async function (body) {
     let { url } = body;
-    const urlId = shortid.generate();
+    const urlId = module.exports.getUniqueIds();
     if (urlUtils.validateUrl(url)) {
-      let wasUrlFound = await Url.query().findOne({ original_url: url });
+      let wasUrlFound = await Url.query().findOne(
+        { original_url: url, is_deleted: false },
+        (qb) => {
+          qb.query().orWhere({ url_id: urlId });
+        }
+      );
+      if (wasUrlFound && wasUrlFound.url_id === urlId) {
+        module.exports.createShortUrl(body);
+      }
       if (wasUrlFound) {
-        return wasUrlFound;
+        throw {
+          message: "This URL already exists!",
+        };
       } else {
         const shortUrl = `${process.env.BASE_URL}/${urlId}`;
 
@@ -20,6 +37,7 @@ module.exports = {
           short_url: shortUrl,
           url_id: urlId,
         });
+        newUrl.clicks = 0;
         return newUrl;
       }
     } else {
