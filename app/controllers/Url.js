@@ -9,7 +9,6 @@ module.exports = {
     return { results: urls };
   },
   getUniqueIds: function () {
-    console.log(uuidv4().split("-"));
     return uuidv4().split("-")[0];
   },
   createShortUrl: async function (body) {
